@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<scxml xmlns="http://www.w3.org/2005/07/scxml" name="temperature" datamodel="ecmascript" version="1.0">
+  <script>
+    var m = require('mraa'); //require mraa
+    var LCD = require('jsupm_i2clcd');
+
+    var analogPin = new m.Aio(0);
+    var leds = {
+      blue : new m.Gpio(4),
+      green : new m.Gpio(3),
+      red : new m.Gpio(2) 
+    };
+
+    var myLcd = new LCD.Jhd1313m1 (0, 0x3E, 0x62);
+
+    Object.keys(leds).forEach(function(k){
+        leds[k].dir(m.DIR_OUT);
+    });
+
+    function readTemperature(){
+      var B = 3975;
+      var val = analogPin.read();
+      var resistance=(1023-val)*10000/val;
+      var temperature=1/(Math.log(resistance/10000)/B+1/298.15)-273.15;
+      var fahrenheit = temperature * 9/5 + 32;
+      console.log(fahrenheit, 'F');
+      myLcd.clear();
+      myLcd.write(fahrenheit.toFixed(3) + ' F');  
+      this.send({name : 'temperature', data : fahrenheit});
+    }
+  </script>
+  <datamodel>
+    <data id="LOWER_BOUND" expr="80"/>
+    <data id="UPPER_BOUND" expr="82"/>
+  </datamodel>
+  <state id="main">
+    <onentry>
+      <script>
+        setInterval(readTemperature.bind(this), 1000);
+      </script>
+    </onentry>
+    <transition type="internal" target="too_hot" event="temperature" cond="_event.data &gt; UPPER_BOUND"/>
+    <transition type="internal" target="too_cold" event="temperature" cond="_event.data &lt; LOWER_BOUND"/>
+    <transition type="internal" target="just_right" event="temperature"/>
+    <initial>
+      <transition target="before_first_reading"/>
+    </initial>
+    <state id="before_first_reading">
+    </state>
+    <state id="after_first_reading">
+      <state id="too_hot">
+        <onentry>
+          <script>
+            leds.red.write(1);
+          </script>
+        </onentry>
+        <onexit>
+          <script>
+            leds.red.write(0);
+          </script>
+        </onexit>
+      </state> 
+      <state id="just_right">
+        <onentry>
+          <script>
+            leds.green.write(1);
+          </script>
+        </onentry>
+        <onexit>
+          <script>
+            leds.green.write(0);
+          </script>
+        </onexit>
+      </state> 
+      <state id="too_cold">
+        <onentry>
+          <script>
+            leds.blue.write(1);
+          </script>
+        </onentry>
+        <onexit>
+          <script>
+            leds.blue.write(0);
+          </script>
+        </onexit>
+      </state> 
+    </state>
+  </state>
+</scxml>
