@@ -1,7 +1,7 @@
 {
   "name": "temperature-sensor-hello-world",
   "version": "1.0.0",
-  "description": "Microexpresscion hello world temperature sensor demo" 
+  "description": "Microexpresscion hello world temperature sensor demo",
   "main": "index.js",
   "scripts": {
     "start": "node node_modules/microexpresscion/bin/www index.scxml"
