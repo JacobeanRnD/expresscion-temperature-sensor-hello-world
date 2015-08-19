@@ -1,14 +1,13 @@
 {
   "name": "temperature-sensor-hello-world",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Microexpresscion hello world temperature sensor demo",
-  "main": "index.js",
   "scripts": {
-    "start": "node node_modules/microexpresscion/bin/www index.scxml"
+    "start": "node node_modules/microexpresscion/bin/www -s _singleton index.scxml"
   },
   "author": "Jacob Beard <jake@jacobeanrnd.com>",
   "license": "Apache-2.0",
   "dependencies": {
-    "microexpresscion": "^1.5.0"
+    "microexpresscion": "1.7.0"
   }
 }
